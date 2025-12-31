@@ -1,0 +1,25 @@
+-- Meme GUI: HUY THÀNH BÉO 😂😂
+
+local player = game.Players.LocalPlayer
+local gui = Instance.new("ScreenGui")
+gui.Name = "MemeGui"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local text = Instance.new("TextLabel")
+text.Parent = gui
+text.Size = UDim2.new(1, 0, 1, 0)
+text.Position = UDim2.new(0, 0, 0, 0)
+text.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+text.BackgroundTransparency = 0.3
+text.Text = "HUY THÀNH BÉO 😂😂"
+text.TextColor3 = Color3.fromRGB(255, 255, 0)
+text.TextScaled = true
+text.Font = Enum.Font.GothamBlack
+text.TextStrokeTransparency = 0
+text.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+
+-- Tự tắt sau 5 giây (muốn tắt thì xóa dòng này)
+task.delay(5, function()
+	gui:Destroy()
+end)
