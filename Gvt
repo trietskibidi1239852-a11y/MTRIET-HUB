@@ -1,0 +1,38 @@
+-- BY TRIET + Auto Load Script
+
+local player = game.Players.LocalPlayer
+
+-- Tạo GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "ByTrietGui"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- Text
+local text = Instance.new("TextLabel")
+text.Parent = gui
+text.Size = UDim2.new(0.4, 0, 0.15, 0)
+text.Position = UDim2.new(0.3, 0, 0.425, 0)
+text.BackgroundTransparency = 0.25
+text.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+text.Text = "BY TRIET"
+text.TextScaled = true
+text.TextColor3 = Color3.fromRGB(0, 0, 0)
+text.Font = Enum.Font.GothamBold
+text.BorderSizePixel = 0
+
+-- Bo góc
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 25)
+corner.Parent = text
+
+-- Đợi 5 giây
+task.wait(5)
+
+-- Xóa chữ
+gui:Destroy()
+
+-- Load script Gravity Hub
+loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/Dev-GravityHub/BloxFruit/refs/heads/main/Main.lua"
+))()
