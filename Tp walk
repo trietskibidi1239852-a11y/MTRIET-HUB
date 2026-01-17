@@ -1,0 +1,121 @@
+-- TP WALK | RESET NOT REMOVE GUI | TRIET
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local Player = Players.LocalPlayer
+
+-- ===== BIẾN =====
+local TPWalk = false
+local Speed = 3
+local GuiVisible = true
+
+-- ===== NHÂN VẬT (TỰ UPDATE KHI RESET) =====
+local Character, HRP, Humanoid
+
+local function SetupCharacter(char)
+	Character = char
+	HRP = char:WaitForChild("HumanoidRootPart")
+	Humanoid = char:WaitForChild("Humanoid")
+
+	Humanoid.Died:Connect(function()
+		TPWalk = false
+		if toggle then
+			toggle.Text = "TP WALK : OFF"
+		end
+	end)
+end
+
+if Player.Character then
+	SetupCharacter(Player.Character)
+end
+
+Player.CharacterAdded:Connect(SetupCharacter)
+
+-- ===== GUI =====
+local gui = Instance.new("ScreenGui")
+gui.Name = "TPWalk_Triet"
+gui.ResetOnSpawn = false -- QUAN TRỌNG
+gui.Parent = Player.PlayerGui
+
+-- NÚT TRIET
+local openBtn = Instance.new("TextButton", gui)
+openBtn.Size = UDim2.new(0,50,0,50)
+openBtn.Position = UDim2.new(0.02,0,0.5,0)
+openBtn.Text = "triet"
+openBtn.TextScaled = true
+openBtn.BackgroundColor3 = Color3.fromRGB(0,170,255)
+openBtn.TextColor3 = Color3.new(0,0,0)
+openBtn.Active = true
+openBtn.Draggable = true
+openBtn.BorderSizePixel = 0
+Instance.new("UICorner", openBtn).CornerRadius = UDim.new(1,0)
+
+-- FRAME CHÍNH
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0,230,0,150)
+frame.Position = UDim2.new(0.1,0,0.4,0)
+frame.BackgroundColor3 = Color3.fromRGB(0,170,255)
+frame.Active = true
+frame.Draggable = true
+frame.BorderSizePixel = 0
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0,14)
+
+-- TITLE
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1,0,0,30)
+title.Text = "TP WALK"
+title.TextScaled = true
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.new(0,0,0)
+
+-- TOGGLE TP WALK
+toggle = Instance.new("TextButton", frame)
+toggle.Size = UDim2.new(0.9,0,0,35)
+toggle.Position = UDim2.new(0.05,0,0.3,0)
+toggle.Text = "TP WALK : OFF"
+toggle.TextScaled = true
+toggle.BackgroundColor3 = Color3.fromRGB(255,255,255)
+toggle.TextColor3 = Color3.new(0,0,0)
+Instance.new("UICorner", toggle).CornerRadius = UDim.new(0,10)
+
+toggle.MouseButton1Click:Connect(function()
+	TPWalk = not TPWalk
+	toggle.Text = TPWalk and "TP WALK : ON" or "TP WALK : OFF"
+end)
+
+-- SPEED BOX (KHÔNG GIỚI HẠN)
+local box = Instance.new("TextBox", frame)
+box.Size = UDim2.new(0.9,0,0,35)
+box.Position = UDim2.new(0.05,0,0.62,0)
+box.Text = tostring(Speed)
+box.PlaceholderText = "Nhập Speed (không giới hạn)"
+box.TextScaled = true
+box.BackgroundColor3 = Color3.fromRGB(255,255,255)
+box.TextColor3 = Color3.new(0,0,0)
+Instance.new("UICorner", box).CornerRadius = UDim.new(0,10)
+
+box.FocusLost:Connect(function()
+	local n = tonumber(box.Text)
+	if n then
+		Speed = n
+	else
+		box.Text = tostring(Speed)
+	end
+end)
+
+-- ẨN / HIỆN GUI
+openBtn.MouseButton1Click:Connect(function()
+	GuiVisible = not GuiVisible
+	frame.Visible = GuiVisible
+end)
+
+-- ===== TP WALK LOOP =====
+RunService.Heartbeat:Connect(function()
+	if TPWalk and Humanoid and HRP and Humanoid.Health > 0 then
+		local dir = Humanoid.MoveDirection
+		if dir.Magnitude > 0 then
+			HRP.CFrame = HRP.CFrame + (dir * Speed)
+		end
+	end
+end)
