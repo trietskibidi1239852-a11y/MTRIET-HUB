@@ -1,0 +1,90 @@
+-- OBBY SHIFT LOCK + CHARACTER FOLLOW CAMERA BY TRIET
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+-- GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "TrietShiftLock"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local button = Instance.new("TextButton")
+button.Parent = gui
+button.Size = UDim2.new(0, 60, 0, 60)
+button.Position = UDim2.new(0, 20, 0.5, -30)
+button.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+button.Text = "TRIET"
+button.TextColor3 = Color3.fromRGB(0, 0, 0)
+button.TextScaled = true
+button.Font = Enum.Font.GothamBold
+button.BorderSizePixel = 0
+button.Active = true
+button.Draggable = true
+
+Instance.new("UICorner", button).CornerRadius = UDim.new(1, 0)
+
+-- CONFIG
+local enabled = false
+local camOffset = Vector3.new(2.5, 0, 0) 
+-- X: lệch phải / trái
+-- Y: cao thấp
+-- Z: gần xa
+
+local conn
+
+local function enable()
+	conn = RunService.RenderStepped:Connect(function()
+		local char = player.Character
+		if not char then return end
+
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		local hum = char:FindFirstChild("Humanoid")
+		if not hrp or not hum then return end
+
+		hum.AutoRotate = false
+
+		-- CAMERA OBBY
+		local baseCF = camera.CFrame
+		local offset =
+			baseCF.RightVector * camOffset.X +
+			baseCF.UpVector * camOffset.Y +
+			baseCF.LookVector * camOffset.Z
+
+		camera.CFrame = CFrame.new(
+			baseCF.Position + offset,
+			baseCF.Position + offset + baseCF.LookVector
+		)
+
+		-- NHÂN VẬT XOAY THEO CAM
+		local look = Vector3.new(baseCF.LookVector.X, 0, baseCF.LookVector.Z)
+		if look.Magnitude > 0 then
+			hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + look)
+		end
+	end)
+end
+
+local function disable()
+	if conn then
+		conn:Disconnect()
+		conn = nil
+	end
+	local char = player.Character
+	if char and char:FindFirstChild("Humanoid") then
+		char.Humanoid.AutoRotate = true
+	end
+end
+
+button.MouseButton1Click:Connect(function()
+	enabled = not enabled
+	if enabled then
+		button.Text = "ON"
+		enable()
+	else
+		button.Text = "TRIET"
+		disable()
+	end
+end)
