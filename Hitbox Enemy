@@ -1,0 +1,109 @@
+-- TRIET HB | HITBOX QUÁI ONLY | FIX BẬT GUI
+
+_G.Hitbox = false
+_G.Size = 15
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+-- ================= GUI =================
+local gui = Instance.new("ScreenGui")
+gui.Name = "TrietHB"
+gui.ResetOnSpawn = false
+gui.Parent = game.CoreGui
+
+-- MAIN FRAME
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0,260,0,180)
+frame.Position = UDim2.new(0.5,-130,0.5,-90)
+frame.BackgroundColor3 = Color3.fromRGB(0,140,200)
+frame.Visible = true
+frame.Active = true
+frame.Draggable = true
+frame.BorderSizePixel = 0
+
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0,16)
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1,0,0,35)
+title.Text = "TRIET HITBOX"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.TextColor3 = Color3.new(1,1,1)
+title.BackgroundTransparency = 1
+
+-- SIZE BOX
+local sizeBox = Instance.new("TextBox", frame)
+sizeBox.Size = UDim2.new(1,-20,0,35)
+sizeBox.Position = UDim2.new(0,10,0,45)
+sizeBox.Text = tostring(_G.Size)
+sizeBox.PlaceholderText = "Nhập SIZE hitbox"
+sizeBox.TextSize = 16
+sizeBox.TextColor3 = Color3.new(1,1,1)
+sizeBox.BackgroundColor3 = Color3.fromRGB(0,110,170)
+Instance.new("UICorner", sizeBox).CornerRadius = UDim.new(0,10)
+
+sizeBox.FocusLost:Connect(function()
+    local n = tonumber(sizeBox.Text)
+    if n then _G.Size = n end
+end)
+
+-- HITBOX TOGGLE
+local hitBtn = Instance.new("TextButton", frame)
+hitBtn.Size = UDim2.new(1,-20,0,45)
+hitBtn.Position = UDim2.new(0,10,0,95)
+hitBtn.Text = "BẬT HITBOX"
+hitBtn.Font = Enum.Font.GothamBold
+hitBtn.TextSize = 18
+hitBtn.TextColor3 = Color3.new(1,1,1)
+hitBtn.BackgroundColor3 = Color3.fromRGB(0,200,120)
+Instance.new("UICorner", hitBtn).CornerRadius = UDim.new(0,12)
+
+hitBtn.MouseButton1Click:Connect(function()
+    _G.Hitbox = not _G.Hitbox
+    hitBtn.Text = _G.Hitbox and "TẮT HITBOX" or "BẬT HITBOX"
+    hitBtn.BackgroundColor3 = _G.Hitbox
+        and Color3.fromRGB(200,70,70)
+        or Color3.fromRGB(0,200,120)
+end)
+
+-- NÚT TRIET HB (ẨN / HIỆN GUI)
+local openBtn = Instance.new("TextButton", gui)
+openBtn.Size = UDim2.new(0,70,0,70)
+openBtn.Position = UDim2.new(0,20,0.5,-35)
+openBtn.Text = "TRIET\nHB"
+openBtn.Font = Enum.Font.GothamBold
+openBtn.TextSize = 14
+openBtn.TextColor3 = Color3.new(1,1,1)
+openBtn.BackgroundColor3 = Color3.fromRGB(0,150,220)
+openBtn.Active = true
+openBtn.Draggable = true
+Instance.new("UICorner", openBtn).CornerRadius = UDim.new(1,0)
+
+openBtn.MouseButton1Click:Connect(function()
+    frame.Visible = not frame.Visible
+end)
+
+-- ================= HITBOX =================
+
+local function isEnemy(model)
+    if Players:GetPlayerFromCharacter(model) then return false end
+    local hum = model:FindFirstChildOfClass("Humanoid")
+    local hrp = model:FindFirstChild("HumanoidRootPart")
+    if not hum or not hrp then return false end
+    if hum.Health <= 0 then return false end
+    if hum.MaxHealth <= 100 then return false end
+    return true
+end
+
+RunService.RenderStepped:Connect(function()
+    if not _G.Hitbox then return end
+    for _,m in ipairs(workspace:GetDescendants()) do
+        if m:IsA("Model") and isEnemy(m) then
+            local hrp = m.HumanoidRootPart
+            hrp.Size = Vector3.new(_G.Size,_G.Size,_G.Size)
+            hrp.CanCollide = false
+            hrp.Transparency = 0.7
+        end
+    end
+end)
