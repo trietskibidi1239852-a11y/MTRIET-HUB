@@ -1,0 +1,73 @@
+-- ANTI JUMPSCARE VISUAL + GUI TOGGLE
+-- BY TRIET STYLE 😎
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local PlayerGui = player:WaitForChild("PlayerGui")
+
+-- ====== CẤU HÌNH ======
+local MAX_SIZE = 0.6
+local antiEnabled = true
+
+-- ====== TẠO GUI ======
+local gui = Instance.new("ScreenGui", PlayerGui)
+gui.Name = "AntiJumpscareGUI"
+gui.ResetOnSpawn = false
+
+local btn = Instance.new("TextButton", gui)
+btn.Size = UDim2.new(0, 160, 0, 45)
+btn.Position = UDim2.new(0, 20, 0.5, -22)
+btn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+btn.TextColor3 = Color3.new(1,1,1)
+btn.TextScaled = true
+btn.Text = "ANTI JUMPSCARE: ON"
+btn.BorderSizePixel = 0
+btn.Active = true
+btn.Draggable = true
+btn.Font = Enum.Font.GothamBold
+
+-- ====== HÀM KIỂM TRA GUI HÙ ======
+local function isJumpscareGui(g)
+	if not antiEnabled then return false end
+
+	if g:IsA("ImageLabel") or g:IsA("ImageButton") then
+		local size = g.Size
+		if size.X.Scale >= MAX_SIZE and size.Y.Scale >= MAX_SIZE then
+			return true
+		end
+	end
+	return false
+end
+
+-- ====== QUÉT GUI ======
+local function scanGui()
+	for _, g in pairs(PlayerGui:GetDescendants()) do
+		if isJumpscareGui(g) then
+			g.Visible = false
+		end
+	end
+end
+
+-- ====== THEO DÕI GUI MỚI ======
+PlayerGui.DescendantAdded:Connect(function(g)
+	task.wait(0.05)
+	if isJumpscareGui(g) then
+		g.Visible = false
+	end
+end)
+
+-- ====== NÚT BẬT / TẮT ======
+btn.MouseButton1Click:Connect(function()
+	antiEnabled = not antiEnabled
+	if antiEnabled then
+		btn.Text = "ANTI JUMPSCARE: ON"
+		btn.BackgroundColor3 = Color3.fromRGB(0,170,255)
+		scanGui()
+	else
+		btn.Text = "ANTI JUMPSCARE: OFF"
+		btn.BackgroundColor3 = Color3.fromRGB(120,120,120)
+	end
+end)
+
+scanGui()
+print("✅ Anti Jumpscare GUI Loaded!")
