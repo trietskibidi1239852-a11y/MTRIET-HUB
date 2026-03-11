@@ -1,0 +1,243 @@
+-- M TRIET HUB FULL FIX
+
+local Players = game:GetService("Players")
+local RS = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+local Lighting = game:GetService("Lighting")
+
+local plr = Players.LocalPlayer
+
+-- GUI
+local gui = Instance.new("ScreenGui")
+pcall(function() gui.Parent = game.CoreGui end)
+if not gui.Parent then gui.Parent = plr.PlayerGui end
+
+-- LOGO
+local logo = Instance.new("TextButton",gui)
+logo.Size = UDim2.new(0,60,0,60)
+logo.Position = UDim2.new(0,20,0.5,0)
+logo.Text = "M\nTRIET"
+logo.BackgroundColor3 = Color3.fromRGB(0,170,255)
+logo.TextColor3 = Color3.new(0,0,0)
+logo.Font = Enum.Font.GothamBold
+logo.TextSize = 14
+logo.Draggable = true
+Instance.new("UICorner",logo).CornerRadius = UDim.new(1,0)
+
+-- MAIN GUI
+local main = Instance.new("Frame",gui)
+main.Size = UDim2.new(0,540,0,360)
+main.Position = UDim2.new(0.5,-270,0.5,-180)
+main.BackgroundColor3 = Color3.fromRGB(0,150,255)
+main.Visible = false
+Instance.new("UICorner",main)
+
+logo.MouseButton1Click:Connect(function()
+	main.Visible = not main.Visible
+end)
+
+-- LEFT COLUMN
+local left = Instance.new("ScrollingFrame",main)
+left.Size = UDim2.new(0,250,1,-20)
+left.Position = UDim2.new(0,10,0,10)
+left.BackgroundTransparency = 1
+left.ScrollBarThickness = 6
+
+local lLayout = Instance.new("UIListLayout",left)
+lLayout.Padding = UDim.new(0,6)
+
+-- RIGHT COLUMN
+local right = Instance.new("ScrollingFrame",main)
+right.Size = UDim2.new(0,250,1,-20)
+right.Position = UDim2.new(0,280,0,10)
+right.BackgroundTransparency = 1
+right.ScrollBarThickness = 6
+
+local rLayout = Instance.new("UIListLayout",right)
+rLayout.Padding = UDim.new(0,6)
+
+-- SCROLL FIX
+task.spawn(function()
+	while true do
+		left.CanvasSize = UDim2.new(0,0,0,lLayout.AbsoluteContentSize.Y + 10)
+		right.CanvasSize = UDim2.new(0,0,0,rLayout.AbsoluteContentSize.Y + 10)
+		task.wait(0.2)
+	end
+end)
+
+-- VARIABLES
+local speed = 16
+local jump = 50
+local playerHit = false
+local npcHit = false
+local playerSize = 5
+local npcSize = 6
+local tpwalk = false
+local tpSpeed = 3
+local infJump = false
+local noclip = false
+local esp = false
+
+-- INPUT BOX
+local function box(parent,text,val,callback)
+
+	local b = Instance.new("TextBox",parent)
+	b.Size = UDim2.new(1,0,0,30)
+	b.Text = text.." : "..val
+	b.BackgroundColor3 = Color3.new(1,1,1)
+	b.TextColor3 = Color3.new(0,0,0)
+	b.Font = Enum.Font.Gotham
+	b.TextSize = 14
+	Instance.new("UICorner",b)
+
+	b.FocusLost:Connect(function()
+		local n = tonumber(b.Text)
+		if n then
+			callback(n)
+			b.Text = text.." : "..n
+		end
+	end)
+
+end
+
+-- TOGGLE
+local function toggle(parent,text,callback)
+
+	local t = Instance.new("TextButton",parent)
+	t.Size = UDim2.new(1,0,0,30)
+	t.Text = text.." : OFF"
+	t.BackgroundColor3 = Color3.new(1,1,1)
+	t.TextColor3 = Color3.new(0,0,0)
+	t.Font = Enum.Font.GothamBold
+	t.TextSize = 14
+	Instance.new("UICorner",t)
+
+	local on = false
+
+	t.MouseButton1Click:Connect(function()
+
+		on = not on
+		t.Text = text.." : "..(on and "ON" or "OFF")
+		t.BackgroundColor3 = on and Color3.fromRGB(0,255,120) or Color3.new(1,1,1)
+
+		callback(on)
+
+	end)
+
+end
+
+-- LEFT SIDE
+box(left,"Speed",speed,function(v) speed=v end)
+box(left,"Jump",jump,function(v) jump=v end)
+box(left,"Player Hitbox Size",playerSize,function(v) playerSize=v end)
+box(left,"NPC Hitbox Size",npcSize,function(v) npcSize=v end)
+box(left,"TP Walk Speed",tpSpeed,function(v) tpSpeed=v end)
+
+-- RIGHT SIDE
+toggle(right,"Player Hitbox",function(v) playerHit=v end)
+toggle(right,"NPC Hitbox",function(v) npcHit=v end)
+toggle(right,"TP Walk",function(v) tpwalk=v end)
+toggle(right,"Infinite Jump",function(v) infJump=v end)
+toggle(right,"Player ESP",function(v) esp=v end)
+toggle(right,"Noclip",function(v) noclip=v end)
+
+toggle(right,"Night Vision",function(v)
+	Lighting.Brightness = v and 5 or 1
+end)
+
+toggle(right,"Fast Interact",function(v)
+
+	for _,p in pairs(workspace:GetDescendants()) do
+		if p:IsA("ProximityPrompt") then
+			p.HoldDuration = v and 0 or 1
+		end
+	end
+
+end)
+
+toggle(right,"Anti Jumpscare",function(v)
+
+	if v then
+		for _,g in pairs(game:GetDescendants()) do
+			if g:IsA("ImageLabel") then
+				g.ImageTransparency = 1
+			end
+		end
+	end
+
+end)
+
+-- SPEED + JUMP
+RS.Heartbeat:Connect(function()
+
+	if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+		plr.Character.Humanoid.WalkSpeed = speed
+		plr.Character.Humanoid.JumpPower = jump
+	end
+
+end)
+
+-- TP WALK
+RS.RenderStepped:Connect(function()
+
+	if tpwalk and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+
+		local hrp = plr.Character.HumanoidRootPart
+		local hum = plr.Character.Humanoid
+
+		if hum.MoveDirection.Magnitude > 0 then
+			hrp.CFrame = hrp.CFrame + (hum.MoveDirection * tpSpeed)
+		end
+
+	end
+
+end)
+
+-- PLAYER ESP (BLUE)
+local espTable = {}
+
+RS.RenderStepped:Connect(function()
+
+	for _,v in pairs(Players:GetPlayers()) do
+
+		if v ~= plr and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+
+			local hrp = v.Character.HumanoidRootPart
+
+			if esp then
+
+				if not espTable[v] then
+
+					local bill = Instance.new("BillboardGui",hrp)
+					bill.Size = UDim2.new(0,200,0,40)
+					bill.AlwaysOnTop = true
+
+					local txt = Instance.new("TextLabel",bill)
+					txt.Size = UDim2.new(1,0,1,0)
+					txt.BackgroundTransparency = 1
+					txt.TextColor3 = Color3.fromRGB(0,170,255)
+					txt.TextStrokeTransparency = 0
+					txt.Font = Enum.Font.GothamBold
+					txt.TextScaled = true
+
+					espTable[v] = txt
+
+				end
+
+				local dist = (plr.Character.HumanoidRootPart.Position - hrp.Position).Magnitude
+				espTable[v].Text = v.Name.." ["..math.floor(dist).."m]"
+
+			else
+
+				if espTable[v] then
+					espTable[v].Parent:Destroy()
+					espTable[v] = nil
+				end
+
+			end
+
+		end
+
+	end
+
+end)
